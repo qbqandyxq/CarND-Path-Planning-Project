@@ -54,8 +54,8 @@ int main() {
   double ref_vel=49.5; 
   //mph
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy]
+  h.onMessage([&ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
+               &map_waypoints_dx,&map_waypoints_dy,&lane]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -93,7 +93,7 @@ int main() {
           //   of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
 
-          int prev_size=previous_path_x.size()
+          int prev_size=previous_path_x.size();
           vector<double> ptsx;
 	  vector<double> ptsy;
 
@@ -126,9 +126,9 @@ int main() {
               ptsy.push_back(ref_y);
           }
             
-          vector<double> next_wp0 = getXY(car_s+30, (2+4*line), map_waypoints_s, map_waypoints_y);
-          vector<double> next_wp1 = getXY(car_s+60, (2+4*line), map_waypoints_s, map_waypoints_y);
-          vector<double> next_wp2 = getXY(car_s+90, (2+4*line), map_waypoints_s, map_waypoints_y);
+          vector<double> next_wp0 = getXY(car_s+30, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(car_s+60, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(car_s+90, (2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
  
           ptsx.push_back(next_wp0[0]);
           ptsy.push_back(next_wp0[1]);
@@ -152,14 +152,14 @@ int main() {
           s.set_points(ptsx, ptsy);
 
           vector<double> next_x_vals;
-          vector<double> netx_y_vals;
+          vector<double> next_y_vals;
 
           for(int i=0;i<previous_path_x.size();i++){
               next_x_vals.push_back(previous_path_x[i]);
               next_y_vals.push_back(previous_path_y[i]);
           }
 
-          double target_x = 30.;
+          double target_x = 30.;	
           double target_y = s(target_x);
           double target_dist = sqrt((target_x)*(target_x) + (target_y)*(target_y));
           double x_add_on=0;
@@ -182,25 +182,6 @@ int main() {
               next_x_vals.push_back(x_point);
               next_y_vals.push_back(y_point);
           }
-  	  // start
-          //vector<double> next_x_vals;
-          //vector<double> next_y_vals;
-          //double dist_inc = 0.5;
-          //for(int i = 0; i < 50; ++i){
-              //double next_s = car_s+(i+1)*dist_inc;
-              //double next_d = 6;
-              //vector<double> xy = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-              //next_x_vals.push_back(xy[0]);
-              //next_y_vals.push_back(xy[1]);
-//              next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
-//              next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
-            //}
-//end
-          /**
-           * TODO: define a path made up of (x,y) points that the car will visit
-           *   sequentially every .02 seconds
-           */
-
           json msgJson;
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
