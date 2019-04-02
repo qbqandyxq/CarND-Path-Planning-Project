@@ -12,7 +12,8 @@
 using nlohmann::json;
 using std::string;
 using std::vector;
- 
+using std::cout;
+using std::endl;
 //
 int main() {
   uWS::Hub h;
@@ -96,7 +97,6 @@ int main() {
           int prev_size=previous_path_x.size();
           vector<double> ptsx;
 	  vector<double> ptsy;
-
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);
@@ -139,12 +139,12 @@ int main() {
           ptsx.push_back(next_wp2[0]);
           ptsy.push_back(next_wp2[1]);
                
-          for(int i=0;i<ptsx.size();++i){
+          for(int i=0;i<ptsx.size();i++){
               double shift_x = ptsx[i] - ref_x;
               double shift_y = ptsy[i] - ref_y;
      
               ptsx[i]=(shift_x * cos(0-ref_yaw)-shift_y*sin(0-ref_yaw));
-              ptsy[i]=(shift_x * sin(0-ref_yaw)-shift_y*cos(-ref_yaw));
+              ptsy[i]=(shift_x * sin(0-ref_yaw)+shift_y*cos(0-ref_yaw));
 
           }
             
