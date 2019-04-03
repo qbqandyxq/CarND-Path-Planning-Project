@@ -101,28 +101,29 @@ int main() {
           }
 
           bool too_close = false;
-            bool left_car = false;
-            bool right_car = false;
+          bool left_car = false;
+          bool right_car = false;
             
           //find ref_v to use
-            int check_lane=lane;
-            double max_right_speed=0.;
-            double max_left_speed=.0;
+          int check_lane=lane;
+          double max_right_speed=0.;
+          double max_left_speed=0.;
+
           for(int i=0;i<sensor_fusion.size();i++){
               float d=sensor_fusion[i][6];
               double vx = sensor_fusion[i][3];
               double vy = sensor_fusion[i][4];
               double check_speed = sqrt(vx*vx+ vy*vy);
               double check_car_s = sensor_fusion[i][5];
-              check_car_s += ((double))prev_size * .02 * check_speed;
+              check_car_s += (double)prev_size * .02 * check_speed;
               
-              if(d>0 && d<4){
+              if(d>=0&&d<=4){
                   check_lane=0;
               }
-              else if(d>4 && d<8 ){
+              else if(d>4&& d<8 ){
                   check_lane=1;
               }
-              else if{
+              else if(d>=8 && d<=12){
                   check_lane=2;
               }
               
