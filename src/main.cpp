@@ -134,38 +134,49 @@ int main() {
                   if(check_speed>=max_head_speed){max_head_speed = check_speed;}
               }
               //left
-              else if( (check_lane - lane) ==-1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>0)){
+              else if( (check_lane - lane) ==-1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-15)){
                   left_car=true;
                   if(check_speed>=max_left_speed){max_left_speed = check_speed;}
                   
               }
               //right
-              else if((check_lane-lane)==1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>0)){
+              else if((check_lane-lane)==1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-15)){
                   right_car=true;
                   if(check_speed>=max_right_speed){max_right_speed = check_speed;}
               }
               
           }
+           
           if(too_close){
-              ref_vel -= .224;
-              if(left_car && right_car){
-                  if(max_head_speed > max_left_speed || max_head_speed>max_right_speed){
-                      continue;
-                  }else if(max_left_speed>=max_right_speed){
-                      lane -=1;
-                  }else{
-                      lane +=1;
+               ref_vel -= .224;
+               if(lane == 1){
+                  if(left_car && right_car){
+                      if(max_head_speed > max_left_speed && max_head_speed>max_right_speed){
+                          ;
+                          }else if(max_left_speed>=max_right_speed){
+                              lane -=1;
+                          }else{
+                              lane +=1;
+                          }
+                      }else if(left_car){
+                          lane +=1; 
+                      }else if(right_car){
+                          lane -=1;
+                      }else{
+                          lane =0; 
+                      } 
                   }
-              }
-              else if(left_car && !right_car){
-                  lane +=1;
-              }
-              else if(!left_car && right_car){
-                  lane -=1;
-              }else{
-                  
-              }
+                  else if(lane == 0){
+                      if(!right_car ||( right_car && max_right_speed > max_head_speed)){
+                          lane +=1;
+                      }
+                  }
+                  else if(lane ==2){
+                      if(!left_car || (left_car && max_left_speed > max_head_speed))
+                          lane -=1;
+                  }
           }
+          
           else if(ref_vel < 49.5){
               ref_vel += .224;
           }
