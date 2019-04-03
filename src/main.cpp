@@ -108,7 +108,8 @@ int main() {
           int check_lane=lane;
           double max_right_speed=0.;
           double max_left_speed=0.;
-
+          double max_head_speed=0.;
+            
           for(int i=0;i<sensor_fusion.size();i++){
               float d=sensor_fusion[i][6];
               double vx = sensor_fusion[i][3];
@@ -130,15 +131,16 @@ int main() {
               
               if ((check_lane - lane)==0 && check_car_s>car_s && ((check_car_s-car_s)<30) ) {
                   too_close=true;
+                  if(check_speed>=max_head_speed){max_head_speed = check_speed;}
               }
               //left
-              else if( (check_lane - lane) ==-1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-30)){
+              else if( (check_lane - lane) ==-1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>0)){
                   left_car=true;
                   if(check_speed>=max_left_speed){max_left_speed = check_speed;}
                   
               }
               //right
-              else if((check_lane-lane)==1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-30)){
+              else if((check_lane-lane)==1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>0)){
                   right_car=true;
                   if(check_speed>=max_right_speed){max_right_speed = check_speed;}
               }
@@ -146,8 +148,10 @@ int main() {
           }
           if(too_close){
               ref_vel -= .224;
-              if(!left_car && !right_car){
-                  if(max_left_speed>=max_right_speed){
+              if(left_car && right_car){
+                  if(max_head_speed > max_left_speed || max_head_speed>max_right_speed){
+                      continue;
+                  }else if(max_left_speed>=max_right_speed){
                       lane -=1;
                   }else{
                       lane +=1;
@@ -158,6 +162,8 @@ int main() {
               }
               else if(!left_car && right_car){
                   lane -=1;
+              }else{
+                  
               }
           }
           else if(ref_vel < 49.5){
