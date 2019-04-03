@@ -101,31 +101,66 @@ int main() {
           }
 
           bool too_close = false;
+            bool left_car = false;
+            bool right_car = false;
+            
           //find ref_v to use
+            int check_lane=lane;
+            double max_right_speed=0.;
+            double max_left_speed=.0;
           for(int i=0;i<sensor_fusion.size();i++){
-              //car in my lane
               float d=sensor_fusion[i][6];
-              if(d<(2+4*lane+2) && d>(2+4*lane-2)){
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed=sqrt(vx*vx+vy*vy);
-                  double check_car_s = sensor_fusion[i][5];
-                  
-                  check_car_s += ((double)prev_size * .02*check_speed);
-                  if((check_car_s > car_s)&&((check_car_s-car_s)<30)){
-                      //ref_vel=29.5;
-                      too_close=true;
-                      if(lane>0){
-                          lane=0;
-                      }
-                  }
+              double vx = sensor_fusion[i][3];
+              double vy = sensor_fusion[i][4];
+              double check_speed = sqrt(vx*vx+ vy*vy);
+              double check_car_s = sensor_fusion[i][5];
+              check_car_s += ((double))prev_size * .02 * check_speed;
+              
+              if(d>0 && d<4){
+                  check_lane=0;
               }
+              else if(d>4 && d<8 ){
+                  check_lane=1;
+              }
+              else if{
+                  check_lane=2;
+              }
+              
+              
+              if ((check_lane - lane)==0 && check_car_s>car_s && ((check_car_s-car_s)<30) ) {
+                  too_close=true;
+              }
+              //left
+              else if( (check_lane - lane) ==-1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-30)){
+                  left_car=true;
+                  if(check_speed>=max_left_speed){max_left_speed = check_speed;}
+                  
+              }
+              //right
+              else if((check_lane-lane)==1 && ((check_car_s-car_s)<30) && ((check_car_s-car_s)>-30)){
+                  right_car=true;
+                  if(check_speed>=max_right_speed){max_right_speed = check_speed;}
+              }
+              
           }
           if(too_close){
-              ref_vel-=.224;
+              ref_vel -= .224;
+              if(!left_car && !right_car){
+                  if(max_left_speed>=max_right_speed){
+                      lane -=1;
+                  }else{
+                      lane +=1;
+                  }
+              }
+              else if(left_car && !right_car){
+                  lane +=1;
+              }
+              else if(!left_car && right_car){
+                  lane -=1;
+              }
           }
           else if(ref_vel < 49.5){
-              ref_vel+=.224;
+              ref_vel += .224;
           }
           vector<double> ptsx;
 	  vector<double> ptsy;
